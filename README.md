@@ -1,70 +1,63 @@
 # OnraiPunishments
 
-Paper 26.3 punishment plugin — source distribution **pending final build and live server validation**.
+A configurable moderation and punishment plugin for **Paper 26.3** (Java **25**).
 
-## Requirements
+## Features
 
-- Paper **26.3**, Java **25**, Gradle 9.3+ with network access for the dependencies.
-- One storage backend: **SQLite** (default), **MySQL** or **MongoDB**. Database drivers are bundled into the shaded output JAR; the Paper API is provided by the server.
-- If using an online-mode server, previously unseen offline player names are resolved using Mojang's public profile API. Server must have network access for those lookups.
+- Permanent and temporary bans and mutes
+- IP bans and kicks
+- Unban and unmute commands
+- Offline player punishment support (except kicks)
+- Configurable ban, kick and mute messages
+- Paginated, configurable punishment history inventory
+- History records for active, expired and revoked punishments
+- SQLite, MySQL or MongoDB storage
+- Staff permissions and mute-bypass permission
 
-## Build
+## Installation
+
+1. Download the compiled JAR from the **Artifacts** section of the [successful GitHub build](https://github.com/trimssmpofficial-coder/OnraiPunishments/actions/runs/42138281846). Extract the artifact ZIP.
+2. Place `OnraiPunishments-1.0.0.jar` in the Paper server's `plugins/` directory.
+3. Start the server once to generate the configuration files.
+4. Configure `plugins/OnraiPunishments/config.yml` and `plugins/OnraiPunishments/menu.yml` as needed, then restart.
+
+**Requirements:** Paper 26.3 and Java 25. This version is **not compatible with Paper 1.21.11**.
+
+SQLite works by default without an external database server. To use MySQL or MongoDB, select the database type and configure its connection settings in `config.yml`. Exactly one database backend is active at a time.
+
+## Commands
+
+| Command | Example | Permission |
+| --- | --- | --- |
+| `/ban` | `/ban Alex Griefing` | `onrai.ban` |
+| `/tempban` | `/tempban Alex 7d Griefing` | `onrai.tempban` |
+| `/mute` | `/mute Alex Spam` | `onrai.mute` |
+| `/tempmute` | `/tempmute Alex 30m Spam` | `onrai.tempmute` |
+| `/ipban` | `/ipban Alex Ban evasion` or `/ipban 192.0.2.1` | `onrai.ipban` |
+| `/kick` | `/kick Alex Be respectful` | `onrai.kick` |
+| `/unban` | `/unban Alex` or `/unban 192.0.2.1` | `onrai.unban` |
+| `/unmute` | `/unmute Alex` | `onrai.unmute` |
+| `/history` | `/history Alex` | `onrai.history` |
+
+Supported duration suffixes are `s`, `m`, `h`, `d` and `w`; combinations such as `2d12h` are supported. Staff commands default to operators. `onrai.mutebypass` can be granted to exempt trusted staff from mute enforcement.
+
+Punishments can be applied to offline players, provided their identity can be resolved. `/kick` requires an online target. The `/history` GUI can only be opened by an in-game player.
+
+## Configuration
+
+- **`config.yml`** — database selection and connection, custom messages, reasons, mute settings and IP retention options.
+- **`menu.yml`** — history menu title, size, item materials, display text, item slots and pagination.
+
+For offline name-based IP bans, the server needs a previously stored IP for that player. A literal IP address can be used directly. Database types are alternatives; switching the configured type does not automatically migrate existing records.
+
+## Building from source
+
+The source is built with Gradle and Java 25. Run:
 
 ```sh
 gradle clean test shadowJar
 ```
 
-Deploy `build/libs/OnraiPunishments-1.0.0.jar` to `plugins/`, restart, then edit:
+The output is `build/libs/OnraiPunishments-1.0.0.jar`. Automated compilation, tests and packaging have passed in [GitHub Actions](https://github.com/trimssmpofficial-coder/OnraiPunishments/actions/runs/42138281846).
 
-- `plugins/OnraiPunishments/config.yml`: database credentials, custom messages, cache and IP privacy settings.
-- `plugins/OnraiPunishments/menu.yml`: history title, icons, lore, pagination, materials and slots.
-
-> This source package intentionally does not contain a prebuilt JAR because the build environment used to prepare it lacks Java 25, Gradle and network dependency resolution. Build and test before using on a live server.
-
-## Commands
-
-| Command | Example | Offline targets | Permission |
-| --- | --- | --- | --- |
-| `/ban` | `/ban Alex Griefing` | Yes | `onrai.ban` |
-| `/tempban` | `/tempban Alex 7d Griefing` | Yes | `onrai.tempban` |
-| `/mute` | `/mute Alex Spam` | Yes | `onrai.mute` |
-| `/tempmute` | `/tempmute Alex 30m Spam` | Yes | `onrai.tempmute` |
-| `/ipban` | `/ipban Alex Ban evasion` or `/ipban 192.0.2.1` | Yes, if last IP known | `onrai.ipban` |
-| `/kick` | `/kick Alex Be respectful` | No | `onrai.kick` |
-| `/unban` | `/unban Alex` or `/unban 192.0.2.1` | Yes | `onrai.unban` |
-| `/unmute` | `/unmute Alex` | Yes | `onrai.unmute` |
-| `/history` | `/history Alex` | Yes (menu is in-game only) | `onrai.history` |
-
-Duration suffixes: `s`, `m`, `h`, `d`, `w`. Combined e.g. `2d12h`.
-
-Console can issue punishments, except that `/history` is a GUI and requires a player.
-
-## Data and operations
-
-- SQL uses prepared statements + HikariCP pool, with WAL + single connection for SQLite. MongoDB uses the official pooled synchronous driver. All database writes from commands are queued on bounded I/O thread count; join verification uses the asynchronous pre-login event.
-- History includes expired and manually revoked punishments; expirations are computed by timestamp at query time, so no periodic DB mutation is necessary.
-- The system blocks affected users at asynchronous pre-login and prevents muted users from chatting or using configured message commands. Grant `onrai.mutebypass` to exempt trusted staff. The mute cache has a configurable TTL and is invalidated upon unmute or disconnect.
-- `store-player-ips` can be disabled to minimize retention, but this limits **offline username-based IP bans**. Never-seen offline player names have no known IP; use a literal IP address if necessary.
-- Storage backends are alternatives, **not** synchronized multi-backend replication. Changing `database.type` does not transfer records; migration requires an external process.
-- Configure appropriate DB access controls, TLS for remote DBs, backups, and a retention policy for IP records.
-
-## Suggested live validation checklist
-
-1. Start the plugin and verify initialization without errors (`/plugins`).
-2. Offline ban a previously seen player, then try joining: the configured ban screen must appear.
-3. Tempban a second player; confirm the display shows remaining duration, then wait for automatic expiry.
-4. Mute/tempmute, send chat, verify the custom message, unmute and verify chat resumes.
-5. IP ban a previously seen offline player and an explicit IP. Verify matching connections are rejected.
-6. Kick an online player and confirm the custom message and history record.
-7. Open `/history <player>` and navigate pages with the configured GUI.
-8. Restart and verify history persists. Repeat with SQLite, MySQL and MongoDB separately.
-9. Test DB unavailability, missing/invalid user names, Mojang API failure, and permission denial.
-
-## Known limits / pending QA
-
-- Full Gradle compilation and Paper in-game validation are **not completed** in this development environment.
-- The plugin currently targets a **single Paper server**, not automatic cross-server pub/sub cache invalidation.
-- Login checks assume Paper's normal proxy/IP forwarding is properly configured.
-- Host permissions and server side chat plugins may require additional integration if they override Paper's chat event.
-- `/history` uses known identities from stored profiles or prior punishments; players without a matching profile or punishment have no stored history.
-- GitHub publication and real gameplay video were **not performed**; both require external authenticated access and/or running a Paper 26.3 server.
+**Validation status:** Build and automated tests passed. Full live-server gameplay testing and a demonstration recording have not yet been completed.
