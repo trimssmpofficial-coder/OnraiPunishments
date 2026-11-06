@@ -2,7 +2,7 @@ name: Import full project source
 on:
   push:
     paths:
-      - '_source/onrai-source.tar.gz'
+      - '_source/**'
       - '.github/workflows/bootstrap.yml'
   workflow_dispatch:
 permissions:
@@ -12,15 +12,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          persist-credentials: true
-      - name: Expand the initial source package
+      - name: Expand complete source archive
         run: |
-          test -f _source/onrai-source.tar.gz
-          tar -xzf _source/onrai-source.tar.gz -C .
-          rm -rf _source
+          test -f _source/part1.b64
+          test -f _source/part2.b64
+          test -f _source/part3.b64
+          test -f _source/part4.b64
+          cat _source/part{1,2,3,4}.b64 | base64 -d > /tmp/source.br
+          python -m pip install brotli
+          python - <<'PY'
+          import io,tarfile,brotli
+          with tarfile.open(fileobj=io.BytesIO(brotli.decompress(open('/tmp/source.br','rb').read()))) as t:
+              t.extractall('.',filter='data')
+          PY
+          rm -rf _source .github/workflows/bootstrap.yml
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
-          git diff --cached --quiet || git commit -m "Import complete plugin source and build configuration"
+          git diff --cached --quiet || git commit -m "Import full Java source, configuration and tests"
           git push origin HEAD:main
