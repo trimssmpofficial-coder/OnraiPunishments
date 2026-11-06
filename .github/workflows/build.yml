@@ -1,0 +1,26 @@
+name: Build and test OnraiPunishments
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.8.1'
+      - name: Test and package
+        run: gradle --no-daemon clean test shadowJar
+      - uses: actions/upload-artifact@v4
+        with:
+          name: OnraiPunishments-jar
+          path: build/libs/OnraiPunishments-1.0.0.jar
+          if-no-files-found: error
