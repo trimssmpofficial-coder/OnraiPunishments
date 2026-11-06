@@ -1,0 +1,50 @@
+# Change this menu without rebuilding the plugin. Restart after editing.
+# Inventory size = rows * 9; valid row count: 1-6.
+title: '&8Punishments &7| &f{player} &8({page}/{pages})'
+rows: 6
+# 28 entries across rows 2-5, enough room for paging buttons on row 6.
+content-slots: [10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 23, 24, 25, 28, 29, 30, 31, 32, 33, 34, 37, 38, 39, 40, 41, 42, 43]
+filler:
+  enabled: true
+  material: GRAY_STAINED_GLASS_PANE
+  name: ' '
+previous:
+  slot: 45
+  material: ARROW
+  name: '&ePrevious page'
+next:
+  slot: 53
+  material: ARROW
+  name: '&eNext page'
+close:
+  slot: 49
+  material: BARRIER
+  name: '&cClose'
+punishment-lore:
+  - '&8────────────────────'
+  - '&7Reason: &f{reason}'
+  - '&7Staff: &f{staff}'
+  - '&7Issued: &f{date}'
+  - '&7Duration: &f{duration}'
+  - '&7Status: &f{status}'
+  - '&7ID: &8{id}'
+  - '&8────────────────────'
+types:
+  ban:
+    material: BARRIER
+    name: '&cPermanent Ban'
+  temp_ban:
+    material: CLOCK
+    name: '&6Temporary Ban'
+  mute:
+    material: PAPER
+    name: '&cPermanent Mute'
+  temp_mute:
+    material: WRITABLE_BOOK
+    name: '&6Temporary Mute'
+  ip_ban:
+    material: REDSTONE_BLOCK
+    name: '&4IP Ban'
+  kick:
+    material: LEATHER_BOOTS
+    name: '&eKick'

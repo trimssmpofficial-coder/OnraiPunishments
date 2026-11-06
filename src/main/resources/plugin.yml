@@ -1,0 +1,76 @@
+name: OnraiPunishments
+version: '1.0.0'
+main: dev.onrai.punishments.OnraiPunishments
+api-version: '26.3'
+author: onrai
+description: Configurable punishment management with SQLite, MySQL and MongoDB.
+commands:
+  ban:
+    description: Permanently ban a player, including offline players
+    usage: /ban <player> [reason]
+    permission: onrai.ban
+  tempban:
+    description: Temporarily ban a player
+    usage: /tempban <player> <duration> [reason]
+    permission: onrai.tempban
+  mute:
+    description: Permanently mute a player
+    usage: /mute <player> [reason]
+    permission: onrai.mute
+  tempmute:
+    description: Temporarily mute a player
+    usage: /tempmute <player> <duration> [reason]
+    permission: onrai.tempmute
+  ipban:
+    description: Ban a known player's IP or a literal IP address
+    usage: /ipban <player|ip> [reason]
+    permission: onrai.ipban
+  kick:
+    description: Kick an online player
+    usage: /kick <player> [reason]
+    permission: onrai.kick
+  unban:
+    description: Revoke active bans and IP bans
+    usage: /unban <player|ip>
+    permission: onrai.unban
+  unmute:
+    description: Revoke active mutes
+    usage: /unmute <player>
+    permission: onrai.unmute
+  history:
+    description: Open punishment history GUI
+    usage: /history <player|ip> [page]
+    permission: onrai.history
+permissions:
+  onrai.ban:
+    default: op
+  onrai.tempban:
+    default: op
+  onrai.mute:
+    default: op
+  onrai.tempmute:
+    default: op
+  onrai.ipban:
+    default: op
+  onrai.kick:
+    default: op
+  onrai.unban:
+    default: op
+  onrai.unmute:
+    default: op
+  onrai.history:
+    default: op
+  onrai.mutebypass:
+    default: false
+  onrai.*:
+    default: op
+    children:
+      onrai.ban: true
+      onrai.tempban: true
+      onrai.mute: true
+      onrai.tempmute: true
+      onrai.ipban: true
+      onrai.kick: true
+      onrai.unban: true
+      onrai.unmute: true
+      onrai.history: true

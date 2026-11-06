@@ -1,0 +1,61 @@
+# Only one backend is active at a time. Switching backends does not migrate data.
+database:
+  type: sqlite # sqlite | mysql | mongodb
+  sqlite:
+    file: punishments.db # relative to plugin data folder
+  mysql:
+    host: 127.0.0.1
+    port: 3306
+    database: punishments
+    username: minecraft
+    password: 'change-me'
+    ssl: false # enable TLS when using remote MySQL
+    pool-size: 6
+  mongodb:
+    uri: 'mongodb://localhost:27017' # supports credentials in URI
+    database: onrai_punishments
+    pool-size: 6
+
+default-reason: 'No reason provided'
+store-player-ips: true # necessary for /ipban on previously-seen offline players
+deny-logins-on-database-error: true # fail closed when database is unavailable
+chat-cache-seconds: 15 # mutes refreshed from database at least this often
+blocked-commands-while-muted: [msg, tell, w, whisper, me, teammsg, tm, reply, r]
+
+# Legacy & color codes supported in every message.
+# Placeholders: {player}, {type}, {staff}, {reason}, {date}, {duration}, {remaining}, {status}, {id}, {count}
+messages:
+  prefix: '&8[&bPunishments&8] &7'
+  no-permission: '&cYou do not have permission to do that.'
+  starting: '&cThe server is starting. Please reconnect shortly.'
+  database-unavailable: '&cPunishment service is temporarily unavailable. Contact staff.'
+  unknown-player: '&cCould not find player &f{player}&c. Check the spelling or ask them to join once.'
+  ip-not-known: '&cNo stored IP is available for &f{player}&c. Use a literal IP or wait for them to join.'
+  must-be-online: '&cThat player must be online for /kick.'
+  players-only: '&cThe history GUI can only be opened in-game.'
+  invalid-duration: '&cInvalid duration. Use a value like 10m, 1h30m, 2d or 1w.'
+  invalid-page: '&cPage must be a positive number.'
+  punished: '&aApplied &f{type} &ato &f{player}&a. Reason: &f{reason}'
+  revoked: '&aRevoked &f{count} &aactive punishment(s) for &f{player}&a.'
+  nothing-to-revoke: '&eThere are no active matching punishments for &f{player}&e.'
+  ban-screen: |-
+    &c&lYou are banned from this server.
+    &7Reason: &f{reason}
+    &7Issued by: &f{staff}
+    &7Time remaining: &f{remaining}
+    &7Punishment ID: &f{id}
+  kick-screen: |-
+    &cYou were kicked from this server.
+    &7Reason: &f{reason}
+  mute-chat: '&cYou are muted. &7Reason: &f{reason} &8| &7Remaining: &f{remaining}'
+  mute-checking: '&eYour mute status is being checked. Please try again.'
+  usage:
+    ban: '&eUsage: /ban <player> [reason]'
+    tempban: '&eUsage: /tempban <player> <duration> [reason]'
+    mute: '&eUsage: /mute <player> [reason]'
+    tempmute: '&eUsage: /tempmute <player> <duration> [reason]'
+    ipban: '&eUsage: /ipban <player|ip> [reason]'
+    kick: '&eUsage: /kick <online-player> [reason]'
+    unban: '&eUsage: /unban <player|ip>'
+    unmute: '&eUsage: /unmute <player>'
+    history: '&eUsage: /history <player|ip> [page]'
